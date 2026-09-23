@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LuminaHome - 一軒家のおしゃれ照明ランダムディスカバリー</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .serif-title {
+      font-family: 'Playfair Display', 'Noto Sans JP', serif;
+    }
+    
+    /* Card Entrance & Shuffle Animations */
+    .card-enter {
+      animation: cardSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes cardSlideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .shuffle-spin {
+      animation: spin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.15); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    .pulse-glow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(217, 119, 6, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
+    }
+
+    /* Glassmorphism Effects */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(217, 119, 6, 0.3);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-amber-50/50 text-slate-800 antialiased min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 transition-colors duration-300">
+
+  <div class="w-full max-w-md mx-auto flex flex-col min-h-[94vh] justify-between">
+    
+    <!-- Top Header -->
+    <header class="flex items-center justify-between py-2 px-1 mb-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 flex items-center justify-center text-white shadow-md shadow-amber-200">
+          <i data-lucide="lamp" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-base leading-tight serif-title tracking-wide">LuminaHome</h1>
+          <p class="text-[11px] text-amber-700/80 font-medium">一軒家のおしゃれ照明発掘</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-1.5">
+        <button id="btnBookmarkView" class="p-2 rounded-full bg-white/90 text-slate-700 hover:bg-white shadow-sm border border-amber-100 transition relative" title="お気に入り">
+          <i data-lucide="heart" class="w-4 h-4"></i>
+          <span id="favBadge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+        <button id="btnSettings" class="p-2 rounded-full bg-white/90 text-slate-700 hover:bg-white shadow-sm border border-amber-100 transition" title="照明を追加">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+        <button id="btnInfo" class="p-2 rounded-full bg-white/90 text-slate-700 hover:bg-white shadow-sm border border-amber-100 transition" title="iPhone活用方法">
+          <i data-lucide="smartphone" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Room & Category Quick Filter -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 text-xs font-medium no-scrollbar">
+      <button data-filter="all" class="filter-btn active px-3 py-1.5 rounded-full bg-slate-900 text-white shadow-sm whitespace-nowrap transition">すべて</button>
+      <button data-filter="pendant" class="filter-btn px-3 py-1.5 rounded-full bg-white text-slate-600 border border-amber-100 hover:bg-amber-50 whitespace-nowrap transition">ペンダント</button>
+      <button data-filter="ceiling" class="filter-btn px-3 py-1.5 rounded-full bg-white text-slate-600 border border-amber-100 hover:bg-amber-50 whitespace-nowrap transition">シーリング</button>
+      <button data-filter="bracket" class="filter-btn px-3 py-1.5 rounded-full bg-white text-slate-600 border border-amber-100 hover:bg-amber-50 whitespace-nowrap transition">ブラケット/壁付</button>
+      <button data-filter="dining" class="filter-btn px-3 py-1.5 rounded-full bg-white text-slate-600 border border-amber-100 hover:bg-amber-50 whitespace-nowrap transition">ダイニング向け</button>
+      <button data-filter="foyer" class="filter-btn px-3 py-1.5 rounded-full bg-white text-slate-600 border border-amber-100 hover:bg-amber-50 whitespace-nowrap transition">玄関・吹き抜け</button>
+    </div>
+
+    <!-- Mode Switcher (Main App View vs iOS Widget View) -->
+    <div class="bg-amber-100/60 p-1 rounded-xl flex gap-1 mb-3 text-xs font-semibold">
+      <button id="modeAppTab" class="flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
+        メイン表示
+      </button>
+      <button id="modeWidgetTab" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5">
+        <i data-lucide="app-window" class="w-3.5 h-3.5 text-amber-600"></i>
+        iPhoneウィジェット風
+      </button>
+    </div>
+
+    <!-- MAIN DISPLAY AREA -->
+    <main class="flex-1 flex flex-col justify-center my-auto">
+
+      <!-- SECTION 1: APP MODE VIEW -->
+      <section id="appView" class="w-full space-y-3">
+        
+        <!-- Search Status / Web Discovery Indicator -->
+        <div id="aiStatusBanner" class="hidden p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 flex items-center justify-between animate-pulse">
+          <div class="flex items-center gap-2">
+            <i data-lucide="loader-2" class="w-4 h-4 text-amber-600 animate-spin"></i>
+            <span id="aiStatusText" class="font-semibold">Webから最新のおしゃれ照明を検索中...</span>
+          </div>
+        </div>
+
+        <!-- Main Product Card -->
+        <div id="productCardContainer" class="card-enter glass-card rounded-3xl overflow-hidden shadow-xl shadow-amber-900/5 border border-white/80 transition-all duration-300 relative group">
+          
+          <!-- Category & Tag -->
+          <div class="absolute top-3 left-3 right-3 z-10 flex justify-between items-center">
+            <div class="flex gap-1.5">
+              <span id="productCategory" class="px-2.5 py-1 rounded-full bg-slate-900/70 backdrop-blur-md text-white text-[10px] font-medium tracking-wider uppercase">
+                Pendant Light
+              </span>
+              <span id="productRoom" class="px-2.5 py-1 rounded-full bg-amber-600/80 backdrop-blur-md text-white text-[10px] font-medium">
+                ダイニング
+              </span>
+            </div>
+            <button id="btnToggleFavorite" class="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md text-slate-600 hover:text-rose-500 hover:bg-white flex items-center justify-center transition shadow-md">
+              <i data-lucide="heart" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Product Image Container -->
+          <div class="relative w-full aspect-[4/3] bg-slate-200 overflow-hidden">
+            <img id="productImage" src="" alt="Lighting Image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80'">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-80"></div>
+            
+            <!-- Source Tag Badge -->
+            <div id="sourceBadge" class="absolute top-3 right-14 px-2 py-0.5 rounded-full bg-emerald-500/80 text-white text-[9px] font-bold backdrop-blur-md hidden">
+              Web発掘
+            </div>
+
+            <div class="absolute bottom-3 left-3 right-3 text-white">
+              <p id="productBrand" class="text-xs font-semibold text-amber-300 tracking-wider uppercase">LOUIS POULSEN</p>
+              <h2 id="productTitle" class="text-lg font-bold line-clamp-1 leading-snug text-white">PH 5 ペンダントライト</h2>
+            </div>
+          </div>
+
+          <!-- Card Body Details -->
+          <div class="p-4 bg-white/95 space-y-3">
+            <div class="flex items-baseline justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">目安価格</span>
+                <span id="productPrice" class="text-2xl font-extrabold text-slate-900 tracking-tight">¥159,500</span>
+              </div>
+              <span id="productTag" class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-200/60">
+                北欧モダン
+              </span>
+            </div>
+
+            <p id="productDescription" class="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+              1958年にデザインされた北欧照明の金字塔。眩しさを感じさせない100%グレアフリーの光で、一軒家のダイニングテーブル上を温かく包み込みます。
+            </p>
+
+            <!-- Action Buttons Grid -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button id="btnGenerateAiRoom" class="py-2.5 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.98]">
+                <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                <span>部屋設置AI生成</span>
+              </button>
+
+              <a id="productLink" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.98]">
+                <span>Webで詳細・価格比較</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: WIDGET PREVIEW MODE -->
+      <section id="widgetView" class="hidden w-full space-y-3">
+        
+        <div class="flex justify-center gap-2 mb-1">
+          <button data-size="small" class="widget-size-btn px-3 py-1 rounded-full text-xs font-semibold bg-amber-600 text-white shadow-sm">小 (2x2)</button>
+          <button data-size="medium" class="widget-size-btn px-3 py-1 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200">中 (4x2)</button>
+          <button data-size="large" class="widget-size-btn px-3 py-1 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200">大 (4x4)</button>
+        </div>
+
+        <!-- Simulated iPhone Screen Backdrop -->
+        <div class="bg-gradient-to-b from-slate-900 via-stone-900 to-black p-5 rounded-[38px] shadow-2xl border-4 border-slate-800 min-h-[350px] flex flex-col justify-center items-center relative overflow-hidden">
+          
+          <div class="absolute top-2 left-6 right-6 flex justify-between items-center text-white/60 text-[10px] font-bold">
+            <span>9:41</span>
+            <div class="flex items-center gap-1">
+              <i data-lucide="wifi" class="w-3 h-3"></i>
+              <i data-lucide="battery" class="w-3 h-3"></i>
+            </div>
+          </div>
+
+          <!-- Small Widget Container -->
+          <div id="widgetContainer" class="w-[155px] h-[155px] rounded-[24px] bg-white/90 backdrop-blur-md p-3 shadow-lg flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-white/30 cursor-pointer group">
+            <div class="absolute inset-0 z-0">
+              <img id="widgetBgImg" src="" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-300" alt="Widget BG">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-black/30 to-transparent"></div>
+            </div>
+
+            <div class="relative z-10 flex justify-between items-start">
+              <span class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-amber-300">
+                <i data-lucide="lamp" class="w-3.5 h-3.5"></i>
+              </span>
+              <span id="widgetBadge" class="text-[9px] font-bold text-white bg-amber-600/80 px-1.5 py-0.5 rounded-full backdrop-blur-sm">Lumina</span>
+            </div>
+
+            <div class="relative z-10 text-white">
+              <p id="widgetBrand" class="text-[8px] font-semibold text-amber-300 uppercase tracking-wide">BRAND</p>
+              <h3 id="widgetTitle" class="text-xs font-bold line-clamp-1 leading-snug">照明タイトル</h3>
+              <p id="widgetPrice" class="text-xs font-extrabold text-amber-200 mt-0.5">¥0</p>
+            </div>
+          </div>
+
+          <p class="text-[10px] text-slate-400 mt-3 text-center">
+            <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>iPhoneのホーム画面に設置した時の表示例です
+          </p>
+        </div>
+
+        <!-- Widget Auto-Update Setting -->
+        <div class="bg-white p-3 rounded-2xl border border-amber-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="timer" class="w-4 h-4 text-amber-600"></i>
+            <div>
+              <p class="text-xs font-semibold text-slate-800">自動シャッフルタイマー</p>
+              <p class="text-[10px] text-slate-500">定期的にランダム変更</p>
+            </div>
+          </div>
+          <select id="autoUpdateSelect" class="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-slate-50 font-medium text-slate-700 outline-none">
+            <option value="0">オフ</option>
+            <option value="5">5秒ごと</option>
+            <option value="10">10秒ごと</option>
+            <option value="30">30秒ごと</option>
+          </select>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- BOTTOM ACTION BAR: Dual Shuffle Mode -->
+    <div class="pt-3 pb-1 space-y-2">
+      <button id="btnWebSearch" class="w-full py-3 px-4 bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:opacity-95 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.97] pulse-glow">
+        <i data-lucide="globe" class="w-4 h-4"></i>
+        <span>🌐 Webから新しい照明をAI探掘！</span>
+      </button>
+
+      <button id="btnShuffle" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-md flex items-center justify-center gap-2 text-xs transition-all active:scale-[0.97] group">
+        <i id="shuffleIcon" data-lucide="shuffle" class="w-4 h-4 transition-transform duration-300 group-hover:rotate-45"></i>
+        <span>リストからランダム選択</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- MODAL 1: Favorites View Modal -->
+  <div id="modalFavorites" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500"></i>
+          <h2 class="font-bold text-slate-900 text-base">お気に入り照明保存リスト</h2>
+        </div>
+        <button class="btnCloseModal p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="favoritesList" class="p-4 overflow-y-auto space-y-3 flex-1 min-h-[200px]"></div>
+      <div class="p-3 border-t border-slate-100 bg-slate-50 text-center text-xs text-slate-500">
+        新築・リフォーム時の照明計画にご活用ください
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Add Custom Lighting Modal -->
+  <div id="modalAddProduct" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-amber-600"></i>
+          <h2 class="font-bold text-slate-900 text-base">照明器具を手動登録</h2>
+        </div>
+        <button class="btnCloseModal p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="formAddProduct" class="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">照明名・型番 *</label>
+          <input type="text" id="inputTitle" required placeholder="例: ARTWORKSTUDIO Glow 5000" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">ブランド/メーカー</label>
+            <input type="text" id="inputBrand" placeholder="例: ARTWORKSTUDIO" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">参考価格 (円) *</label>
+            <input type="number" id="inputPrice" required placeholder="45000" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">種類</label>
+            <select id="inputCategory" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+              <option value="Pendant">ペンダントライト</option>
+              <option value="Ceiling">シーリングライト</option>
+              <option value="Bracket">ブラケットライト</option>
+              <option value="Spotlight">スポット/ダクトレール</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">おすすめの場所</label>
+            <input type="text" id="inputRoom" placeholder="例: ダイニング, 玄関" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">画像URL</label>
+          <input type="url" id="inputImage" placeholder="https://..." class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Webリンク/購入ページURL *</label>
+          <input type="url" id="inputLink" required placeholder="https://..." class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">特徴・ポイント</label>
+          <textarea id="inputDesc" rows="2" placeholder="調光機能、素材感など" class="w-full p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none resize-none"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition mt-2">
+          リストに追加する
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: iPhone Guide Modal -->
+  <div id="modalInfo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="smartphone" class="w-5 h-5 text-amber-600"></i>
+          <h2 class="font-bold text-slate-900 text-base">iPhoneでのご活用ガイド</h2>
+        </div>
+        <button class="btnCloseModal p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3.5 text-xs text-slate-600 leading-relaxed">
+        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100">
+          <h3 class="font-bold text-amber-900 mb-1 flex items-center gap-1.5 text-sm">
+            <i data-lucide="share" class="w-4 h-4 text-amber-600"></i>
+            1. ホーム画面に追加してアプリ化
+          </h3>
+          <p>iPhone Safariの<span class="font-bold text-slate-800">「共有ボタン」</span>→<span class="font-bold text-slate-800">「ホーム画面に追加」</span>を選択すると、ホーム画面からいつでも1タップで起動できます！</p>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-1.5 text-sm">
+            <i data-lucide="globe" class="w-4 h-4 text-amber-600"></i>
+            2. AIリアルタイムWeb検索
+          </h3>
+          <p>「🌐 Webから新しい照明をAI探掘」ボタンを押すと、AIが最新の一軒家向け人気照明（ルイスポールセン、FLOS、ARTWORKSTUDIO等）をWeb検索して新しいカードを生成します。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: AI Room Preview Modal -->
+  <div id="modalAiRoom" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-white/40">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-amber-50/50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-600"></i>
+          <h2 id="aiRoomTitle" class="font-bold text-slate-900 text-sm truncate max-w-[260px]">AI 部屋設置イメージ</h2>
+        </div>
+        <button class="btnCloseModal p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-4 flex flex-col items-center justify-center min-h-[300px] relative bg-slate-950">
+        <div id="aiRoomLoader" class="flex flex-col items-center gap-3 text-white/80 p-8 text-center">
+          <i data-lucide="loader-2" class="w-10 h-10 text-amber-400 animate-spin"></i>
+          <p class="text-xs font-semibold">一軒家への設置イメージをAI生成中...</p>
+          <p class="text-[10px] text-white/50">照明の光や部屋の雰囲気をシミュレーションしています</p>
+        </div>
+        <img id="aiRoomImg" src="" alt="AI Generated Room" class="w-full h-auto rounded-2xl object-cover hidden shadow-xl border border-white/10">
+      </div>
+      <div class="p-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button class="btnCloseModal px-4 py-2 bg-slate-900 text-white font-semibold text-xs rounded-xl hover:bg-slate-800 transition">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initial Preset Database of High-End House Lighting (Expanded Collection)
+    const initialLightingProducts = [
+      {
+        id: '1',
+        title: 'PH 5 ペンダントライト',
+        brand: 'Louis Poulsen (ルイスポールセン)',
+        price: 159500,
+        category: 'Pendant',
+        room: 'ダイニング',
+        style: '北欧モダン',
+        image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=Louis+Poulsen+PH5',
+        desc: '1958年発表の北欧照明の世界的金字塔。眩しさを完璧に抑えたグレアフリーの光がダイニングテーブルを温かく包みます。',
+        isWeb: false
+      },
+      {
+        id: '2',
+        title: 'Glow 5000 LED シーリングランプ',
+        brand: 'ARTWORKSTUDIO (アートワークスタジオ)',
+        price: 49500,
+        category: 'Ceiling',
+        room: 'リビング',
+        style: 'モダン',
+        image: 'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=ARTWORKSTUDIO+Glow+5000',
+        desc: 'メイン照明と天井を照らす間接照明を切り替え可能なミニマルでスタイリッシュな最高峰シーリング。',
+        isWeb: false
+      },
+      {
+        id: '3',
+        title: 'VERONICA ブラケットライト',
+        brand: 'INTERFORM (インターフォルム)',
+        price: 18480,
+        category: 'Bracket',
+        room: '玄関・階段',
+        style: 'アンティークモダン',
+        image: 'https://images.unsplash.com/photo-1540932239986-30128078f3c5?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=INTERFORM+VERONICA+bracket',
+        desc: 'ガラスグローブと真鍮の質感壁付けライト。一軒家の玄関ホールや階段コーナーに上質な陰影を作ります。',
+        isWeb: false
+      },
+      {
+        id: '4',
+        title: 'A330S ペンダント Golden Bell',
+        brand: 'Artek (アルテック)',
+        price: 60500,
+        category: 'Pendant',
+        room: 'キッチンカウンター',
+        style: '北欧ナチュラル',
+        image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=Artek+Golden+Bell',
+        desc: 'アルヴァ・アアルト設計の黄金のベル型照明。滑らかな曲線と温かな下方向の光でカウンターを美しく演出。',
+        isWeb: false
+      },
+      {
+        id: '5',
+        title: 'IC Lights W1 壁付け・ブラケット',
+        brand: 'FLOS (フロス)',
+        price: 94600,
+        category: 'Bracket',
+        room: '吹抜け・リビング',
+        style: 'イタリアモダン',
+        image: 'https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=FLOS+IC+Lights+W1',
+        desc: '細い金属棒の上で球体が絶妙なバランスで静止している芸術的照明。吹抜け空間や廊下の印象的なアクセントに。',
+        isWeb: false
+      },
+      {
+        id: '6',
+        title: 'A331 ペンダント Beehive',
+        brand: 'Artek (アルテック)',
+        price: 161700,
+        category: 'Pendant',
+        room: '吹抜け・リビング',
+        style: '北欧デザイン',
+        image: 'https://images.unsplash.com/photo-1543198183-16a246830501?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=Artek+Beehive+A331',
+        desc: '蜂の巣のような層状ブラスリングから漏れる温かな光。一軒家の高天井や吹抜けに彫刻のような圧倒的存在感を与えます。',
+        isWeb: false
+      },
+      {
+        id: '7',
+        title: 'MAYUHANA (マユハナ) ペンダント',
+        brand: 'YAMAGIWA (ヤマギワ)',
+        price: 68200,
+        category: 'Pendant',
+        room: '和室・ダイニング',
+        style: '和モダン',
+        image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=YAMAGIWA+MAYUHANA',
+        desc: '伊東豊雄氏デザイン。グラスファイバーの二重・三重の繭のようなシェードから放たれる柔らかな拡散光が幻想的。',
+        isWeb: false
+      },
+      {
+        id: '8',
+        title: 'Nelson Bubble Lamp Saucer Pendant',
+        brand: 'HAY (ヘイ)',
+        price: 86900,
+        category: 'Pendant',
+        room: 'リビング・吹き抜け',
+        style: 'ミッドセンチュリー',
+        image: 'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=HAY+Nelson+Bubble+Lamp',
+        desc: 'ジョージ・ネルソン不朽の名作。特殊ポリマーから生まれるやわらかなフォルムと均一な光が一軒家リビングを包みます。',
+        isWeb: false
+      },
+      {
+        id: '9',
+        title: 'Tolomeo Reading Floor/Wall',
+        brand: 'Artemide (アルテミデ)',
+        price: 79200,
+        category: 'Bracket',
+        room: '書斎・寝室',
+        style: '機能美モダン',
+        image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=Artemide+Tolomeo',
+        desc: '自由自在な角度調整が可能なアルミの機能美ライト。一軒家の書斎やベッドサイドでの読書灯に最適。',
+        isWeb: false
+      },
+      {
+        id: '10',
+        title: 'Cesta テーブル/フロアランプ',
+        brand: 'Santa & Cole (サンタアンドコール)',
+        price: 132000,
+        category: 'Spotlight',
+        room: '玄関・床の間',
+        style: 'スペインモダン',
+        image: 'https://images.unsplash.com/photo-1540932239986-30128078f3c5?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=Santa+and+Cole+Cesta',
+        desc: '職人が曲げ木加工したチェリー材のフレームとガラスグローブ。持ち運んで床や玄関に飾れるポータブルアート。',
+        isWeb: false
+      },
+      {
+        id: '11',
+        title: 'Unfold Pendant Light',
+        brand: 'Muuto (ムート)',
+        price: 39600,
+        category: 'Pendant',
+        room: 'ダイニング・キッチン',
+        style: '北欧カジュアル',
+        image: 'https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=Muuto+Unfold+pendant',
+        desc: '柔軟なシリコンラバー素材で作られたユニークな工業調ペンダント。温かみのあるカラーバリエーションが魅力。',
+        isWeb: false
+      },
+      {
+        id: '12',
+        title: 'Snoopy テーブルランプ',
+        brand: 'FLOS (フロス)',
+        price: 173800,
+        category: 'Spotlight',
+        room: 'リビング・コンソール',
+        style: 'イタリアデザイン',
+        image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.google.com/search?q=FLOS+Snoopy+light',
+        desc: 'カスティリオーニ兄弟による愛らしいスヌーピーシェイプ。重厚な大理石ベースと光沢シェードの対比が上質。',
+        isWeb: false
+      }
+    ];
+
+    // State
+    let products = JSON.parse(localStorage.getItem('lumina_products')) || initialLightingProducts;
+    let favorites = JSON.parse(localStorage.getItem('lumina_favorites')) || [];
+    let currentProduct = null;
+    let currentFilter = 'all';
+    let autoUpdateInterval = null;
+
+    // DOM Elements
+    let productCardContainer, productImage, productCategory, productRoom, productBrand, productTitle, productPrice, productTag, productDescription, productLink, sourceBadge;
+    let widgetBgImg, widgetBrand, widgetTitle, widgetPrice, widgetContainer;
+    let btnToggleFavorite, favBadge, btnShuffle, shuffleIcon, btnWebSearch, aiStatusBanner, aiStatusText;
+    let modalFavorites, favoritesList, modalAddProduct, modalInfo, modalAiRoom;
+
+    function getFilteredProducts() {
+      if (currentFilter === 'all') return products;
+      return products.filter(p => {
+        if (currentFilter === 'pendant') return p.category.toLowerCase().includes('pendant');
+        if (currentFilter === 'ceiling') return p.category.toLowerCase().includes('ceiling');
+        if (currentFilter === 'bracket') return p.category.toLowerCase().includes('bracket');
+        if (currentFilter === 'dining') return p.room.includes('ダイニング');
+        if (currentFilter === 'foyer') return p.room.includes('玄関') || p.room.includes('吹抜け') || p.room.includes('階段');
+        return true;
+      });
+    }
+
+    function getRandomProduct() {
+      let list = getFilteredProducts();
+      
+      if (list.length === 0) {
+        list = products;
+      }
+      if (list.length === 0) return null;
+
+      // STRICTLY filter out currentProduct to GUARANTEE a different product on click
+      let candidates = list.filter(p => !currentProduct || p.id !== currentProduct.id);
+      
+      if (candidates.length === 0) {
+        candidates = products.filter(p => !currentProduct || p.id !== currentProduct.id);
+      }
+      
+      if (candidates.length > 0) {
+        const idx = Math.floor(Math.random() * candidates.length);
+        return candidates[idx];
+      }
+      
+      return list[0];
+    }
+
+    function renderProduct(product) {
+      if (!product) return;
+      currentProduct = product;
+
+      // Animate Card
+      if (productCardContainer) {
+        productCardContainer.classList.remove('card-enter');
+        void productCardContainer.offsetWidth; // Trigger reflow
+        productCardContainer.classList.add('card-enter');
+      }
+
+      // Update Card UI
+      if (productImage) productImage.src = product.image;
+      if (productCategory) productCategory.textContent = product.category || 'Lighting';
+      if (productRoom) productRoom.textContent = product.room || '一軒家';
+      if (productBrand) productBrand.textContent = product.brand || 'BRAND';
+      if (productTitle) productTitle.textContent = product.title;
+      if (productPrice) productPrice.textContent = `¥${Number(product.price).toLocaleString()}`;
+      if (productTag) productTag.textContent = product.style || 'デザイン照明';
+      if (productDescription) productDescription.textContent = product.desc || '一軒家の空間を上質に演出する照明器具。';
+      if (productLink) productLink.href = product.link || '#';
+
+      if (sourceBadge) {
+        if (product.isWeb) {
+          sourceBadge.classList.remove('hidden');
+        } else {
+          sourceBadge.classList.add('hidden');
+        }
+      }
+
+      // Update Widget UI
+      if (widgetBgImg) widgetBgImg.src = product.image;
+      if (widgetBrand) widgetBrand.textContent = product.brand || 'BRAND';
+      if (widgetTitle) widgetTitle.textContent = product.title;
+      if (widgetPrice) widgetPrice.textContent = `¥${Number(product.price).toLocaleString()}`;
+
+      updateFavoriteButtonState();
+    }
+
+    function handleShuffle() {
+      const nextProduct = getRandomProduct();
+      if (nextProduct) {
+        if (shuffleIcon) {
+          shuffleIcon.classList.add('shuffle-spin');
+          setTimeout(() => shuffleIcon.classList.remove('shuffle-spin'), 600);
+        }
+        renderProduct(nextProduct);
+      }
+    }
+
+    async function searchLightingFromWeb() {
+      if (!aiStatusBanner || !btnWebSearch) return;
+
+      aiStatusBanner.classList.remove('hidden');
+      if (aiStatusText) aiStatusText.textContent = "Webから一軒家向けのおしゃれ照明を探索中...";
+      btnWebSearch.disabled = true;
+      btnWebSearch.classList.add('opacity-70');
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      const brandList = ["Louis Poulsen", "FLOS", "Artemide", "Artek", "HAY", "YAMAGIWA", "Muuto", "Santa & Cole", "Fritz Hansen", "Verpan", "Anglepoise", "DCW editions", "Tom Dixon", "Le Klint", "Nuura", "ARTWORKSTUDIO"];
+      const randomBrand = brandList[Math.floor(Math.random() * brandList.length)];
+
+      const systemPrompt = `あなたは高級注文住宅・一軒家のインテリアデザイナーです。Web上から実在する、デザイン性が高く人気のある一軒家向けのおしゃれな照明器具（ペンダントライト、シーリング、ブラケット、スポットライト等）を検索して1つ抽出し、以下のJSON形式で返してください。
+現在注目ブランド: 「${randomBrand}」などを優先して探してください。
+直前の表示商品（${currentProduct ? currentProduct.title : ''}）とは【必ず異なる商品型番】を選んでください。
+
+返答は純粋なJSONテキストのみにしてください。
+JSONフォーマット:
+{
+  "title": "商品名・シリーズ名",
+  "brand": "ブランド・メーカー名",
+  "price": 35000,
+  "category": "Pendant または Ceiling または Bracket または Spotlight",
+  "room": "ダイニング または リビング または 玄関・階段 または キッチン",
+  "style": "北欧モダン または モダン または インダストリアル または 和モダン",
+  "desc": "一軒家のどこに映えるか等の魅力解説（80文字程度）"
+}`;
+
+      const randomQueries = [
+        `${randomBrand} 人気 一軒家 照明 おしゃれ おすすめ`,
+        `高級注文住宅 おしゃれ ペンダントライト ${randomBrand}`,
+        `吹き抜け 玄関 ブラケットライト ${randomBrand} モダン`,
+        `北欧 インテリア ダイニング テーブル ペンダント ${randomBrand}`
+      ];
+      const targetQuery = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+
+      const payload = {
+        contents: [{ parts: [{ text: targetQuery }] }],
+        tools: [{ "google_search": {} }],
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const data = JSON.parse(jsonMatch[0]);
+          
+          const sampleImages = [
+            'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1540932239986-30128078f3c5?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1543198183-16a246830501?auto=format&fit=crop&w=800&q=80'
+          ];
+          const chosenImage = sampleImages[Math.floor(Math.random() * sampleImages.length)];
+
+          const newProduct = {
+            id: Date.now().toString(),
+            title: data.title || 'Web見つけ照明',
+            brand: data.brand || randomBrand,
+            price: Number(data.price) || 38000,
+            category: data.category || 'Pendant',
+            room: data.room || 'ダイニング',
+            style: data.style || 'モダン',
+            image: chosenImage,
+            link: `https://www.google.com/search?q=${encodeURIComponent((data.brand || '') + ' ' + (data.title || ''))}`,
+            desc: data.desc || 'Webから自動発掘されたおしゃれ照明です。',
+            isWeb: true
+          };
+
+          products.unshift(newProduct);
+          localStorage.setItem('lumina_products', JSON.stringify(products));
+          
+          if (aiStatusText) aiStatusText.textContent = "✨ Webから新しい照明を発掘しました！";
+          renderProduct(newProduct);
+        } else {
+          throw new Error('Parse error');
+        }
+      } catch (err) {
+        console.log('Search fallback to random product', err);
+        handleShuffle();
+      } finally {
+        setTimeout(() => {
+          if (aiStatusBanner) aiStatusBanner.classList.add('hidden');
+          if (btnWebSearch) {
+            btnWebSearch.disabled = false;
+            btnWebSearch.classList.remove('opacity-70');
+          }
+        }, 800);
+      }
+    }
+
+    async function generateAiRoom() {
+      if (!currentProduct) return;
+
+      const aiRoomImg = document.getElementById('aiRoomImg');
+      const aiRoomLoader = document.getElementById('aiRoomLoader');
+      const aiRoomTitle = document.getElementById('aiRoomTitle');
+
+      if (aiRoomTitle) aiRoomTitle.textContent = `${currentProduct.brand} ${currentProduct.title}`;
+      if (modalAiRoom) modalAiRoom.classList.remove('hidden');
+      if (aiRoomLoader) aiRoomLoader.classList.remove('hidden');
+      if (aiRoomImg) aiRoomImg.classList.add('hidden');
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
+
+      const prompt = `A stylish, high-end Japanese modern house interior showing a ${currentProduct.room || 'dining room'} with installed lighting fixture: ${currentProduct.title} by ${currentProduct.brand}. Warm soft lighting glow, interior design magazine photograph, realistic 8k`;
+
+      const payload = {
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE']
+        }
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+        if (base64Data && aiRoomImg) {
+          aiRoomImg.src = `data:image/png;base64,${base64Data}`;
+          aiRoomImg.classList.remove('hidden');
+          if (aiRoomLoader) aiRoomLoader.classList.add('hidden');
+        } else {
+          throw new Error('No image returned');
+        }
+      } catch (err) {
+        console.log('AI Room fallback to original image', err);
+        if (aiRoomImg) {
+          aiRoomImg.src = currentProduct.image;
+          aiRoomImg.classList.remove('hidden');
+        }
+        if (aiRoomLoader) aiRoomLoader.classList.add('hidden');
+      }
+    }
+
+    function updateFavoriteButtonState() {
+      if (!currentProduct || !btnToggleFavorite) return;
+      const isFav = favorites.some(f => f.id === currentProduct.id);
+      const btnIcon = btnToggleFavorite.querySelector('i');
+      
+      if (isFav) {
+        btnToggleFavorite.classList.add('text-rose-500', 'bg-rose-50');
+        btnToggleFavorite.classList.remove('text-slate-600');
+        if (btnIcon) btnIcon.setAttribute('class', 'w-5 h-5 fill-rose-500 text-rose-500');
+      } else {
+        btnToggleFavorite.classList.remove('text-rose-500', 'bg-rose-50');
+        btnToggleFavorite.classList.add('text-slate-600');
+        if (btnIcon) btnIcon.setAttribute('class', 'w-5 h-5 text-slate-600');
+      }
+
+      if (favBadge) {
+        if (favorites.length > 0) {
+          favBadge.textContent = favorites.length;
+          favBadge.classList.remove('hidden');
+        } else {
+          favBadge.classList.add('hidden');
+        }
+      }
+    }
+
+    function toggleFavorite() {
+      if (!currentProduct) return;
+      const index = favorites.findIndex(f => f.id === currentProduct.id);
+      if (index > -1) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(currentProduct);
+      }
+      localStorage.setItem('lumina_favorites', JSON.stringify(favorites));
+      updateFavoriteButtonState();
+    }
+
+    function renderFavorites() {
+      if (!favoritesList) return;
+      favoritesList.innerHTML = '';
+      if (favorites.length === 0) {
+        favoritesList.innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-xs">
+            <i data-lucide="heart-off" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            お気に入りに登録された照明はありません
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      favorites.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200/60 rounded-2xl gap-3 hover:bg-slate-100/70 transition';
+        div.innerHTML = `
+          <img src="${item.image}" alt="${item.title}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0 bg-slate-200" onerror="this.src='https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80'">
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] font-bold text-amber-600 truncate">${item.brand}</p>
+            <h4 class="text-xs font-bold text-slate-800 truncate">${item.title}</h4>
+            <p class="text-xs font-extrabold text-slate-900 mt-0.5">¥${Number(item.price).toLocaleString()}</p>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="btnSelectFav p-2 text-amber-600 hover:bg-amber-100 rounded-xl transition" title="表示">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+            <button class="btnRemoveFav p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition" title="削除">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+
+        div.querySelector('.btnSelectFav').addEventListener('click', () => {
+          renderProduct(item);
+          if (modalFavorites) modalFavorites.classList.add('hidden');
+        });
+
+        div.querySelector('.btnRemoveFav').addEventListener('click', () => {
+          favorites = favorites.filter(f => f.id !== item.id);
+          localStorage.setItem('lumina_favorites', JSON.stringify(favorites));
+          renderFavorites();
+          updateFavoriteButtonState();
+        });
+
+        favoritesList.appendChild(div);
+      });
+
+      lucide.createIcons();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Bind DOM Elements
+      productCardContainer = document.getElementById('productCardContainer');
+      productImage = document.getElementById('productImage');
+      productCategory = document.getElementById('productCategory');
+      productRoom = document.getElementById('productRoom');
+      productBrand = document.getElementById('productBrand');
+      productTitle = document.getElementById('productTitle');
+      productPrice = document.getElementById('productPrice');
+      productTag = document.getElementById('productTag');
+      productDescription = document.getElementById('productDescription');
+      productLink = document.getElementById('productLink');
+      sourceBadge = document.getElementById('sourceBadge');
+
+      widgetBgImg = document.getElementById('widgetBgImg');
+      widgetBrand = document.getElementById('widgetBrand');
+      widgetTitle = document.getElementById('widgetTitle');
+      widgetPrice = document.getElementById('widgetPrice');
+      widgetContainer = document.getElementById('widgetContainer');
+
+      btnToggleFavorite = document.getElementById('btnToggleFavorite');
+      favBadge = document.getElementById('favBadge');
+      btnShuffle = document.getElementById('btnShuffle');
+      shuffleIcon = document.getElementById('shuffleIcon');
+      btnWebSearch = document.getElementById('btnWebSearch');
+      aiStatusBanner = document.getElementById('aiStatusBanner');
+      aiStatusText = document.getElementById('aiStatusText');
+
+      modalFavorites = document.getElementById('modalFavorites');
+      favoritesList = document.getElementById('favoritesList');
+      modalAddProduct = document.getElementById('modalAddProduct');
+      modalInfo = document.getElementById('modalInfo');
+      modalAiRoom = document.getElementById('modalAiRoom');
+
+      // Initialize Lucide Icons
+      lucide.createIcons();
+
+      // Render initial product
+      handleShuffle();
+
+      // Event Listeners: Main Action Buttons
+      if (btnShuffle) {
+        btnShuffle.addEventListener('click', handleShuffle);
+      }
+      if (btnWebSearch) {
+        btnWebSearch.addEventListener('click', searchLightingFromWeb);
+      }
+      if (btnToggleFavorite) {
+        btnToggleFavorite.addEventListener('click', toggleFavorite);
+      }
+      const btnGenerateAiRoom = document.getElementById('btnGenerateAiRoom');
+      if (btnGenerateAiRoom) {
+        btnGenerateAiRoom.addEventListener('click', generateAiRoom);
+      }
+
+      // Event Listeners: Header Modals
+      const btnBookmarkView = document.getElementById('btnBookmarkView');
+      if (btnBookmarkView) {
+        btnBookmarkView.addEventListener('click', () => {
+          renderFavorites();
+          if (modalFavorites) modalFavorites.classList.remove('hidden');
+        });
+      }
+
+      const btnSettings = document.getElementById('btnSettings');
+      if (btnSettings) {
+        btnSettings.addEventListener('click', () => {
+          if (modalAddProduct) modalAddProduct.classList.remove('hidden');
+        });
+      }
+
+      const btnInfo = document.getElementById('btnInfo');
+      if (btnInfo) {
+        btnInfo.addEventListener('click', () => {
+          if (modalInfo) modalInfo.classList.remove('hidden');
+        });
+      }
+
+      // Close Modals
+      document.querySelectorAll('.btnCloseModal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          [modalFavorites, modalAddProduct, modalInfo, modalAiRoom].forEach(m => {
+            if (m) m.classList.add('hidden');
+          });
+        });
+      });
+
+      [modalFavorites, modalAddProduct, modalInfo, modalAiRoom].forEach(modal => {
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+          });
+        }
+      });
+
+      // Quick Category Filter Buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('bg-slate-900', 'text-white');
+            b.classList.add('bg-white', 'text-slate-600');
+          });
+          btn.classList.add('bg-slate-900', 'text-white');
+          btn.classList.remove('bg-white', 'text-slate-600');
+
+          currentFilter = btn.dataset.filter || 'all';
+          handleShuffle();
+        });
+      });
+
+      // View Mode Switcher
+      const modeAppTab = document.getElementById('modeAppTab');
+      const modeWidgetTab = document.getElementById('modeWidgetTab');
+      const appView = document.getElementById('appView');
+      const widgetView = document.getElementById('widgetView');
+
+      if (modeAppTab && modeWidgetTab && appView && widgetView) {
+        modeAppTab.addEventListener('click', () => {
+          appView.classList.remove('hidden');
+          widgetView.classList.add('hidden');
+          modeAppTab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+          modeAppTab.classList.remove('text-slate-600');
+          modeWidgetTab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+          modeWidgetTab.classList.add('text-slate-600');
+        });
+
+        modeWidgetTab.addEventListener('click', () => {
+          appView.classList.add('hidden');
+          widgetView.classList.remove('hidden');
+          modeWidgetTab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+          modeWidgetTab.classList.remove('text-slate-600');
+          modeAppTab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+          modeAppTab.classList.add('text-slate-600');
+        });
+      }
+
+      // Widget Size Switcher
+      document.querySelectorAll('.widget-size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.widget-size-btn').forEach(b => {
+            b.classList.remove('bg-amber-600', 'text-white', 'shadow-sm');
+            b.classList.add('bg-white', 'text-slate-600');
+          });
+          btn.classList.add('bg-amber-600', 'text-white', 'shadow-sm');
+          btn.classList.remove('bg-white', 'text-slate-600');
+
+          if (!widgetContainer) return;
+          const size = btn.dataset.size;
+          if (size === 'small') {
+            widgetContainer.className = 'w-[155px] h-[155px] rounded-[24px] bg-white/90 backdrop-blur-md p-3 shadow-lg flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-white/30 cursor-pointer group';
+          } else if (size === 'medium') {
+            widgetContainer.className = 'w-[320px] h-[155px] rounded-[24px] bg-white/90 backdrop-blur-md p-3.5 shadow-lg flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-white/30 cursor-pointer group';
+          } else if (size === 'large') {
+            widgetContainer.className = 'w-[320px] h-[320px] rounded-[32px] bg-white/90 backdrop-blur-md p-4 shadow-lg flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-white/30 cursor-pointer group';
+          }
+        });
+      });
+
+      // Auto Update Interval
+      const autoUpdateSelect = document.getElementById('autoUpdateSelect');
+      if (autoUpdateSelect) {
+        autoUpdateSelect.addEventListener('change', (e) => {
+          if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+          const sec = parseInt(e.target.value, 10);
+          if (sec > 0) {
+            autoUpdateInterval = setInterval(handleShuffle, sec * 1000);
+          }
+        });
+      }
+
+      // Add Custom Product Form
+      const formAddProduct = document.getElementById('formAddProduct');
+      if (formAddProduct) {
+        formAddProduct.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const newProduct = {
+            id: Date.now().toString(),
+            title: document.getElementById('inputTitle').value,
+            brand: document.getElementById('inputBrand').value || 'BRAND',
+            price: Number(document.getElementById('inputPrice').value),
+            category: document.getElementById('inputCategory').value,
+            room: document.getElementById('inputRoom').value || '一軒家',
+            style: 'カスタム',
+            image: document.getElementById('inputImage').value || 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80',
+            link: document.getElementById('inputLink').value,
+            desc: document.getElementById('inputDesc').value || '手動登録された照明器具です。',
+            isWeb: false
+          };
+
+          products.unshift(newProduct);
+          localStorage.setItem('lumina_products', JSON.stringify(products));
+          renderProduct(newProduct);
+          if (modalAddProduct) modalAddProduct.classList.add('hidden');
+          formAddProduct.reset();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
